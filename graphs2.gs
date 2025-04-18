@@ -1,29 +1,11 @@
-function dopost(e) {
-  const spreadsheetId = "1B7f-ZYfZhe0j43zrzThVFGSXWE_H5gbnvj9sZYW5K50";
-  const ss = SpreadsheetApp.openById(spreadsheetId);
-  const sheet = ss.getSheetByName("Beehive Data");
+function doPost(e) {
+  const sheet = SpreadsheetApp.openById("1B7f-ZYfZhe0j43zrzThVFGSXWE_H5gbnvj9sZYW5K50").getSheetByName("Beehive Data");
 
-  if (!sheet) {
-    throw new Error("Sheet 'Beehive Data' not found. Please ensure the sheet exists.");
-  }
+  const timeSlot = e.parameter.timeSlot;
+  const data = sheet.getDataRange().getValues();
+  const headers = data.shift(); // Get headers and remove them from data
 
-  const dataRange = sheet.getDataRange();
-  const data = dataRange.getValues();
-  const headers = data.shift(); // Remove headers from data
-  const startTime = e.parameter.startTime ? new Date(e.parameter.startTime) : null;
-
-  Logger.log("Received startTime: " + startTime); // Debugging log
-
-  // Ensure timestamps are valid and filter based on startTime
-  const filteredData = data.filter(row => {
-    const rowTime = new Date(row[0]); // Assuming the timestamp is in the first column
-    return startTime && !isNaN(rowTime) ? rowTime >= startTime : true; // Filter rows based on startTime
-  });
-
-  Logger.log("Filtered Data: " + JSON.stringify(filteredData)); // Debugging log
-
-  // Format the filtered data
-  const formattedData = filteredData.map(row => {
+  let filteredData = data.map(row => {
     const entry = {};
     headers.forEach((header, index) => {
       entry[header] = row[index];
@@ -31,5 +13,12 @@ function dopost(e) {
     return entry;
   });
 
-  return ContentService.createTextOutput(JSON.stringify(formattedData)).setMimeType(ContentService.MimeType.JSON);
+  // Convert filtered data to tab-separated CSV format
+  const csvData = [headers.join("\t")].concat(
+    filteredData.map(row => headers.map(header => row[header] || "").join("\t"))
+  ).join("\n");
+
+  return ContentService
+    .createTextOutput(csvData)
+    .setMimeType(ContentService.MimeType.TEXT);
 }

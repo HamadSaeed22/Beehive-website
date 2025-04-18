@@ -27,7 +27,7 @@ const BeeHiveMonitor = () => {
     try {
       setLoading(true);
       setError(null);
-      const response = await fetch("https://script.google.com/macros/s/AKfycbyqkcItNb--ZhoUQ53-YUoa7pJ6Y2feAMQXCJfumqffB06sriTI5-sKKOa5xe3aiwCRDg/exec");
+      const response = await fetch("https://script.google.com/macros/s/AKfycbxXPhHsmn41dB9pXUwE16OsXE5pJYpzVy4VlPw1E4IVh2GeTos0L5UAMdEJD2DKohovAQ/exec");
       const data = await response.json();
       
       if (data.error) {
